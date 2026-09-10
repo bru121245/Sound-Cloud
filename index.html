@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Embed Tester</title>
+    <title>SoundCloud Player & Embed Tester</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,14 +20,14 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 20px;
-            border: 1px solid #444;
+            border: 1px solid #ff5500; /* SoundCloud Orange Accent */
             background-color: #2a2a2a;
             color: #fff;
             border-radius: 4px;
             box-sizing: border-box;
         }
         button {
-            background-color: #007bff;
+            background-color: #ff5500; /* SoundCloud Orange */
             color: white;
             border: none;
             padding: 12px 20px;
@@ -35,10 +35,11 @@
             font-size: 14px;
             cursor: pointer;
             border-radius: 4px;
+            font-weight: bold;
             transition: background 0.2s;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #e14b00;
         }
         .desc {
             font-size: 12px;
@@ -50,34 +51,39 @@
 <body>
 
 <div class="container">
-    <h2>CloudFront Embed Tool</h2>
-    <p>Paste your CloudFront URL below to test different cloaking and embedding methods.</p>
+    <h2>SoundCloud Embed Tool</h2>
+    <p>Paste your target SoundCloud Track, Playlist, or Embed URL below to test configuration.</p>
     
-    <!-- Replace the value placeholder with your real CloudFront URL later -->
-    <input type="text" id="targetUrl" value="https://soundcloud.net" placeholder="https://soundcloud.net">
+    <!-- Using the standard SoundCloud web interface player as a default testing URL -->
+    <input type="text" id="targetUrl" value="https://soundcloud.com" placeholder="https://soundcloud.com">
 
     <div>
-        <button onclick="launchAboutBlank()">1. Launch in about:blank</button>
-        <div class="desc">Opens a completely blank browser tab and forces your site inside it so the URL bar stays clean.</div>
+        <button onclick="launchAboutBlank()">1. Launch SoundCloud in about:blank</button>
+        <div class="desc">Opens a blank browser tab and pushes SoundCloud into it to disguise the address bar.</div>
     </div>
 
     <div>
-        <button onclick="launchBlob()">2. Launch as Blob URL</button>
-        <div class="desc">Converts an iframe template into a local raw binary object URL. Helps bypass simple URL-string filters.</div>
+        <button onclick="launchBlob()">2. Launch SoundCloud as Blob URL</button>
+        <div class="desc">Converts a SoundCloud frame into a virtual local object URL to slip past basic text filters.</div>
     </div>
 
     <div>
-        <button onclick="launchIframe()">3. Basic HTML Iframe</button>
-        <div class="desc">The traditional way to embed a website into another page. Simple, but heavily monitored by filters.</div>
+        <button onclick="launchIframe()">3. Basic SoundCloud HTML Iframe</button>
+        <div class="desc">Loads the site directly inside the dashed frame on this current page layout.</div>
     </div>
 </div>
 
 <div id="iframeContainer" style="margin-top:20px;"></div>
 
 <script>
-    // Retrieves whatever URL is currently typed in the input box
     function getUrl() {
-        return document.getElementById('targetUrl').value.trim();
+        let rawUrl = document.getElementById('targetUrl').value.trim();
+
+        // Convert a shorthand SoundCloud URL into the embeddable widget URL.
+        if (rawUrl.includes("soundcloud.com") && !rawUrl.includes("://soundcloud.com")) {
+            return "https://w.soundcloud.com/player/?url=" + encodeURIComponent(rawUrl) + "&auto_play=false";
+        }
+        return rawUrl;
     }
 
     // Method 1: about:blank Document Write
@@ -87,15 +93,15 @@
         if (win) {
             win.document.write(`
                 <html style="margin:0;padding:0;overflow:hidden;">
-                    <head><title>Google Docs</title></head>
+                    <head><title>Music Player</title></head>
                     <body style="margin:0;padding:0;">
-                        <iframe src="${url}" style="width:100vw;height:100vh;border:none;margin:0;padding:0;"></iframe>
+                        <iframe src="${url}" style="width:100vw;height:100vh;border:none;margin:0;padding:0;" allow="autoplay"></iframe>
                     </body>
                 </html>
             `);
             win.document.close();
         } else {
-            alert("Popup blocked! Please allow popups for this site.");
+            alert("Vivaldi blocked the window! Click the lock/globe icon next to your URL bar, go to Site Settings, and change 'Pop-ups' to Allow.");
         }
     }
 
@@ -104,33 +110,31 @@
         const url = getUrl();
         const htmlContent = `
             <html style="margin:0;padding:0;overflow:hidden;">
+                <head><title>Music Sync</title></head>
                 <body style="margin:0;padding:0;">
-                    <iframe src="${url}" style="width:100vw;height:100vh;border:none;margin:0;padding:0;"></iframe>
+                    <iframe src="${url}" style="width:100vw;height:100vh;border:none;margin:0;padding:0;" allow="autoplay"></iframe>
                 </body>
             </html>
         `;
         
-        // Creates a virtual file in the browser's memory
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const blobUrl = URL.createObjectURL(blob);
-        
-        // Opens the blob file in a new tab
         window.open(blobUrl, '_blank');
     }
 
-    // Method 3: Standard Native HTML Iframe (Appends to the current page)
+    // Method 3: Standard Native HTML Iframe
     function launchIframe() {
         const url = getUrl();
         const container = document.getElementById('iframeContainer');
         
-        // Clear previous test
         container.innerHTML = '';
         
         const iframe = document.createElement('iframe');
         iframe.src = url;
         iframe.style.width = "100%";
-        iframe.style.height = "500px";
-        iframe.style.border = "2px dashed #444";
+        iframe.style.height = "450px";
+        iframe.style.border = "2px dashed #ff5500";
+        iframe.setAttribute("allow", "autoplay");
         
         container.appendChild(iframe);
     }
